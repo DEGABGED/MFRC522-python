@@ -27,8 +27,7 @@ import signal
 import time
   
 class MFRC522:
-  NRSTPD = 22
-  
+
   MAX_LEN = 16
   
   PCD_IDLE       = 0x00
@@ -127,7 +126,8 @@ class MFRC522:
     
   serNum = []
   
-  def __init__(self, dev='/dev/spidev0.0', spd=1000000):
+  def __init__(self, dev='/dev/spidev0.0', spd=1000000, rst=22):
+    self.NRSTPD = rst
     spi.openSPI(device=dev,speed=spd)
     GPIO.setmode(GPIO.BOARD)
     GPIO.setup(self.NRSTPD, GPIO.OUT)
@@ -414,3 +414,8 @@ class MFRC522:
     self.Write_MFRC522(self.TxAutoReg, 0x40)
     self.Write_MFRC522(self.ModeReg, 0x3D)
     self.AntennaOn()
+
+  def MFRC522_Anticoll_String(self):
+    (status,backData) = self.MFRC522_Anticoll()
+    output = ''.join(list(map(lambda x: hex(int(x)).split('x')[-1], backData))).upper()
+    return (status,output)
