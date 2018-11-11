@@ -24,6 +24,7 @@
 import RPi.GPIO as GPIO
 import signal
 import time
+from Queue import Queue
 
 from MFRC522 import MFRC522
 
@@ -31,19 +32,17 @@ continue_reading = True
 timeout = 3 # 3 seconds
 pi_id = '41056'
 
-# Create a list of Scanners (to be associated with each MIFAREReader)
-Scanners = [
-    {'scanner_id': '1', 'card_id': '', 'last_scanned': time.time()},
-    {'scanner_id': '2', 'card_id': '', 'last_scanned': time.time()}
-]
+def after_pump(arg):
+    print "Pump from # {}".format(arg)
+    print "Card: {}".format(Scanners[Pumps[arg]]['card_id'])
+    for scanner in Scanners:
+        print "{}-{} card:{}, lastscan:{}".format(pi_id, scanner['scanner_id'], scanner['card'], scanner['last_scanned'])
 
 # Capture SIGINT for cleanup when the script is aborted
 def end_read(signal,frame):
     global continue_reading
     print "Ctrl+C captured, ending read."
     print "Dumping Scanner values:"
-    for scanner in Scanners:
-        print "{}-{} card:{}, lastscan:{}".format(pi_id, scanner['scanner_id'], scanner['card'], scanner['last_scanned'])
 
     continue_reading = False
     GPIO.cleanup()
@@ -55,6 +54,23 @@ signal.signal(signal.SIGINT, end_read)
 MIFAREReaders = []
 MIFAREReaders.append(MFRC522(dev='/dev/spidev1.0', rst=18))
 MIFAREReaders.append(MFRC522())
+
+# Create a list of Scanners (to be associated with each MIFAREReader)
+Scanners = [
+        {'scanner_id': '1', 'card_id': '', 'last_scanned': time.time(), 'pump_pin': 15},
+        {'scanner_id': '2', 'card_id': '', 'last_scanned': time.time(), 'pump_pin': 16}
+]
+
+# Create another mapping between Pumps and Scanners
+Pumps = { 15: 0, 16: 1 }
+
+# Set the GPIO pins
+GPIO.setmode(GPIO.BOARD)
+for scanner in Scanners:
+    pin = scanner['pump_pin']
+    GPIO.setup(pin, GPIO.IN, pull_up_down = GPIO.PUD_DOWN)
+    GPIO.add_event_detect(pin, GPIO.RISING)
+    GPIO.add_event_callback(pin, after_pump)
 
 # Welcome message
 print "Welcome to the MFRC522 data read example"
