@@ -25,6 +25,7 @@ import RPi.GPIO as GPIO
 import signal
 
 from MFRC522 import MFRC522
+from Scanner import Scanner
 
 continue_reading = True
 
@@ -40,8 +41,8 @@ signal.signal(signal.SIGINT, end_read)
 
 # Create a list of MFRC522 objects
 MIFAREReaders = []
-MIFAREReaders.append(MFRC522(dev='/dev/spidev1.0', rst=18))
-MIFAREReaders.append(MFRC522())
+MIFAREReaders.append(Scanner(dev='/dev/spidev1.0', rst=18))
+MIFAREReaders.append(Scanner())
 
 # Welcome message
 print "Welcome to the MFRC522 data read example"
@@ -53,19 +54,19 @@ while continue_reading:
     for MIFAREReader in MIFAREReaders:
 
         # Scan for cards    
-        (status,TagType) = MIFAREReader.MFRC522_Request(MIFAREReader.PICC_REQIDL)
+        (status,TagType) = MIFAREReader.request()
 
         # If a card is found
-        if status == MIFAREReader.MI_OK:
+        if status == MFRC522.MI_OK:
             print "Card detected from Reader"
         else:
             continue
 
         # Get the UID of the card
-        (status,uid) = MIFAREReader.MFRC522_Anticoll_String()
+        (status,uid) = MIFAREReader.uid()
 
         # If we have the UID, continue
-        if status == MIFAREReader.MI_OK:
+        if status == MFRC522.MI_OK:
 
             # Print UID
             #print "Card read UID: %s,%s,%s,%s" % (uid[0], uid[1], uid[2], uid[3])
