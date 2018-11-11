@@ -24,25 +24,29 @@
 import RPi.GPIO as GPIO
 import signal
 import time
-from Queue import Queue
 
 from MFRC522 import MFRC522
+from RequestQueue import RequestQueue
 
 continue_reading = True
 timeout = 3 # 3 seconds
 pi_id = '41056'
 
 def after_pump(arg):
+    card_id = Scanners[Pumps[arg]]['card_id']
+    scanner_id = Scanners[Pumps[arg]]['scanner_id']
     print "Pump from # {}".format(arg)
-    print "Card: {}".format(Scanners[Pumps[arg]]['card_id'])
+    print "Card: {}".format(card_id)
     for scanner in Scanners:
         print "{}-{} card:{}, lastscan:{}".format(pi_id, scanner['scanner_id'], scanner['card_id'], scanner['last_scanned'])
+    q.put({'card_id': card_id, 'scanner_id': scanner_id})
 
 # Capture SIGINT for cleanup when the script is aborted
 def end_read(signal,frame):
     global continue_reading
     print "Ctrl+C captured, ending read."
     print "Dumping Scanner values:"
+    request_q.dump()
 
     continue_reading = False
     GPIO.cleanup()
@@ -71,6 +75,10 @@ for scanner in Scanners:
     GPIO.setup(pin, GPIO.IN, pull_up_down = GPIO.PUD_DOWN)
     GPIO.add_event_detect(pin, GPIO.RISING)
     GPIO.add_event_callback(pin, after_pump)
+
+# Create the job queue
+request_q = RequestQueue()
+q = request_q.get_queue()
 
 # Welcome message
 print "Welcome to the MFRC522 data read example"
