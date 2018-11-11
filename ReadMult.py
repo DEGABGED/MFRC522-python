@@ -40,7 +40,7 @@ signal.signal(signal.SIGINT, end_read)
 
 # Create a list of MFRC522 objects
 MIFAREReaders = []
-MIFAREReaders.append(MFRC522(dev='/dev/spidev0.1'))
+MIFAREReaders.append(MFRC522(dev='/dev/spidev1.0', rst=18))
 MIFAREReaders.append(MFRC522())
 
 # Welcome message

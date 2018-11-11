@@ -38,7 +38,7 @@ def end_read(signal,frame):
 signal.signal(signal.SIGINT, end_read)
 
 # Create an object of the class MFRC522
-MIFAREReader = MFRC522.MFRC522(dev='/dev/spidev0.1', rst=18)
+MIFAREReader = MFRC522.MFRC522(dev='/dev/spidev1.0', rst=18)
 #MIFAREReader = MFRC522.MFRC522()
 
 # Welcome message
