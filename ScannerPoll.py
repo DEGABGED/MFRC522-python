@@ -32,21 +32,21 @@ continue_reading = True
 timeout = 3 # 3 seconds
 pi_id = '41056'
 debouncer_time_stamp = time.time()
-debouncer_threshold = 0.3
+debouncer_threshold = 0.5
 
 def after_pump(arg):
     global debouncer_time_stamp
     global debouncer_threshold
     time_now = time.time()
-    if (time_now - debouncer_time_stamp) < debouncer_threshold:
-        return
-    card_id = Scanners[Pumps[arg]]['card_id']
-    scanner_id = Scanners[Pumps[arg]]['scanner_id']
-    print "Pump from # {}".format(arg)
-    print "Card: {}".format(card_id)
-    for scanner in Scanners:
-        print "{}-{} card:{}, lastscan:{}".format(pi_id, scanner['scanner_id'], scanner['card_id'], scanner['last_scanned'])
-    q.put({'card_id': card_id, 'scanner_id': scanner_id})
+    if (time_now - debouncer_time_stamp) >= debouncer_threshold:
+        card_id = Scanners[Pumps[arg]]['card_id']
+        scanner_id = Scanners[Pumps[arg]]['scanner_id']
+        print "Pump from # {}".format(arg)
+        print "Card: {}".format(card_id)
+        for scanner in Scanners:
+            print "{}-{} card:{}, lastscan:{}".format(pi_id, scanner['scanner_id'], scanner['card_id'], scanner['last_scanned'])
+        q.put({'card_id': card_id, 'scanner_id': scanner_id})
+    debouncer_time_stamp = time_now
 
 # Capture SIGINT for cleanup when the script is aborted
 def end_read(signal,frame):
