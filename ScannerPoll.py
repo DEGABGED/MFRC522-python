@@ -36,7 +36,7 @@ def after_pump(arg):
     print "Pump from # {}".format(arg)
     print "Card: {}".format(Scanners[Pumps[arg]]['card_id'])
     for scanner in Scanners:
-        print "{}-{} card:{}, lastscan:{}".format(pi_id, scanner['scanner_id'], scanner['card'], scanner['last_scanned'])
+        print "{}-{} card:{}, lastscan:{}".format(pi_id, scanner['scanner_id'], scanner['card_id'], scanner['last_scanned'])
 
 # Capture SIGINT for cleanup when the script is aborted
 def end_read(signal,frame):
