@@ -23,15 +23,30 @@
 
 import RPi.GPIO as GPIO
 import signal
+import time
 
 from MFRC522 import MFRC522
 
 continue_reading = True
+timeout = 3 # 3 seconds
+pi_id = '41056'
+
+# Create a list of Scanners (to be associated with each MIFAREReader)
+Scanners = [
+    {'scanner_id': '1', 'card_id': '', 'last_scanned': time.time()},
+    {'scanner_id': '2', 'card_id': '', 'last_scanned': time.time()}
+]
 
 # Capture SIGINT for cleanup when the script is aborted
 def end_read(signal,frame):
     global continue_reading
     print "Ctrl+C captured, ending read."
+    print "Dumping Scanner values:"
+    for scanner in Scanners:
+        print "{}-{} card:{}, lastscan:{}".format(
+                (pi_id, scanner['scanner_id'], scanner['card'], scanner['last_scanned'])
+                )
+
     continue_reading = False
     GPIO.cleanup()
 
@@ -50,9 +65,16 @@ print "Press Ctrl-C to stop."
 # This loop keeps checking for chips. If one is near it will get the UID and authenticate
 while continue_reading:
 
-    for MIFAREReader in MIFAREReaders:
+    # Poll the scanners
 
-        # Scan for cards    
+    for (ndx, MIFAREReader) in enumerate(MIFAREReaders):
+
+        # Cleanup timeout cards
+        scanner = Scanners[ndx]
+        if time.time() - scanner['last_scanned'] > timeout:
+            scanner['card_id'] = ''
+
+        # Scan for cards
         (status,TagType) = MIFAREReader.MFRC522_Request(MIFAREReader.PICC_REQIDL)
 
         # If a card is found
@@ -70,4 +92,6 @@ while continue_reading:
             # Print UID
             #print "Card read UID: %s,%s,%s,%s" % (uid[0], uid[1], uid[2], uid[3])
             print "Card read UID: %s" % (uid)
+            Scanners[ndx]['card_id'] = uid
+            Scanners[ndx]['last_scanned'] = time.time()
 
