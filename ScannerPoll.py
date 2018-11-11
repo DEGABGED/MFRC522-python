@@ -43,9 +43,7 @@ def end_read(signal,frame):
     print "Ctrl+C captured, ending read."
     print "Dumping Scanner values:"
     for scanner in Scanners:
-        print "{}-{} card:{}, lastscan:{}".format(
-                (pi_id, scanner['scanner_id'], scanner['card'], scanner['last_scanned'])
-                )
+        print "{}-{} card:{}, lastscan:{}".format(pi_id, scanner['scanner_id'], scanner['card'], scanner['last_scanned'])
 
     continue_reading = False
     GPIO.cleanup()
