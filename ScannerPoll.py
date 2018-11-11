@@ -31,8 +31,15 @@ from RequestQueue import RequestQueue
 continue_reading = True
 timeout = 3 # 3 seconds
 pi_id = '41056'
+debouncer_time_stamp = time.time()
+debouncer_threshold = 0.3
 
 def after_pump(arg):
+    global debouncer_time_stamp
+    global debouncer_threshold
+    time_now = time.time()
+    if (time_now - debouncer_time_stamp) < debouncer_threshold:
+        return
     card_id = Scanners[Pumps[arg]]['card_id']
     scanner_id = Scanners[Pumps[arg]]['scanner_id']
     print "Pump from # {}".format(arg)
